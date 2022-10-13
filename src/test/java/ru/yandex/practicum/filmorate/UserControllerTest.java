@@ -2,10 +2,10 @@ package ru.yandex.practicum.filmorate;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import ru.yandex.practicum.filmorate.controller.UserController;
+import ru.yandex.practicum.filmorate.exception.UpdateException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -72,11 +72,8 @@ class UserControllerTest {
         newUser.setEmail(email);
         final ValidationException exception = assertThrows(
                 ValidationException.class,
-                new Executable() {
-                    @Override
-                    public void execute() {
-                        final User errorUser = userController.createUser(newUser);
-                    }
+                () -> {
+                    final User errorUser = userController.createUser(newUser);
                 });
         assertEquals("Адрес электронной почты не может быть пустым" +
                 " и должен содержать символ @.", exception.getMessage());
@@ -89,11 +86,8 @@ class UserControllerTest {
         newUser.setLogin(login);
         final ValidationException exception = assertThrows(
                 ValidationException.class,
-                new Executable() {
-                    @Override
-                    public void execute() {
-                        final User errorUser = userController.createUser(newUser);
-                    }
+                () -> {
+                    final User errorUser = userController.createUser(newUser);
                 });
         assertEquals("Логин не может быть пустым и содержать пробелы.", exception.getMessage());
     }
@@ -104,26 +98,20 @@ class UserControllerTest {
         newUser.setBirthday(LocalDate.of(2022,11,25));
         final ValidationException exception = assertThrows(
                 ValidationException.class,
-                new Executable() {
-                    @Override
-                    public void execute() {
-                        final User errorUser = userController.createUser(newUser);
-                    }
+                () -> {
+                    final User errorUser = userController.createUser(newUser);
                 });
         assertEquals("Дата рождения не может быть в будущем.", exception.getMessage());
     }
 
     @Test
-    public void shouldReturnExceptionWhenIdNoFound() {
+    public void shouldReturnExceptionWhenIdNotFound() {
         final User newUser = userController.createUser(user);
         newUser.setId(2);
-        final ValidationException exception = assertThrows(
-                ValidationException.class,
-                new Executable() {
-                    @Override
-                    public void execute() {
-                        final User updateUser = userController.updateUser(newUser);
-                    }
+        final UpdateException exception = assertThrows(
+                UpdateException.class,
+                () -> {
+                    final User updateUser = userController.updateUser(newUser);
                 });
         assertEquals("Не верный id пользователя.", exception.getMessage());
     }

@@ -2,11 +2,10 @@ package ru.yandex.practicum.filmorate;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
 import ru.yandex.practicum.filmorate.controller.FilmController;
+import ru.yandex.practicum.filmorate.exception.UpdateException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -15,8 +14,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class FilmControllerTest {
 
-    FilmController filmController;
-    Film film;
+    private FilmController filmController;
+    private Film film;
 
     @BeforeEach
     public void beforeEach() {
@@ -67,11 +66,8 @@ class FilmControllerTest {
         newFilm.setName("");
         final ValidationException exception = assertThrows(
                 ValidationException.class,
-                new Executable() {
-                    @Override
-                    public void execute() {
-                        final Film errorFilm = filmController.addFilm(newFilm);
-                    }
+                () -> {
+                    final Film errorFilm = filmController.addFilm(newFilm);
                 });
         assertEquals("Название фильма не может быть пустым.", exception.getMessage());
     }
@@ -84,11 +80,8 @@ class FilmControllerTest {
                 "сделать описание более сжатым, но при этом не потерять суть.");
         final ValidationException exception = assertThrows(
                 ValidationException.class,
-                new Executable() {
-                    @Override
-                    public void execute() {
-                        final Film errorFilm = filmController.addFilm(newFilm);
-                    }
+                () -> {
+                    final Film errorFilm = filmController.addFilm(newFilm);
                 });
         assertEquals("Максимальная длина описания — 200 символов.", exception.getMessage());
     }
@@ -99,11 +92,8 @@ class FilmControllerTest {
         newFilm.setReleaseDate(LocalDate.of(1895,12,25));
         final ValidationException exception = assertThrows(
                 ValidationException.class,
-                new Executable() {
-                    @Override
-                    public void execute() {
-                        final Film errorFilm = filmController.addFilm(newFilm);
-                    }
+                () -> {
+                    final Film errorFilm = filmController.addFilm(newFilm);
                 });
         assertEquals("Дата релиза должна быть не раньше 28 декабря 1895 года.", exception.getMessage());
     }
@@ -114,26 +104,20 @@ class FilmControllerTest {
         newFilm.setDuration(-100);
         final ValidationException exception = assertThrows(
                 ValidationException.class,
-                new Executable() {
-                    @Override
-                    public void execute() {
-                        final Film errorFilm = filmController.addFilm(newFilm);
-                    }
+                () -> {
+                    final Film errorFilm = filmController.addFilm(newFilm);
                 });
         assertEquals("Продолжительность фильма должна быть положительной.", exception.getMessage());
     }
 
     @Test
-    public void shouldReturnExceptionWhenIdNoFound() {
+    public void shouldReturnExceptionWhenIdNotFound() {
         final Film newFilm = filmController.addFilm(film);
         newFilm.setId(2);
-        final ValidationException exception = assertThrows(
-                ValidationException.class,
-                new Executable() {
-                    @Override
-                    public void execute() {
-                        final Film updateFilm = filmController.updateFilm(newFilm);
-                    }
+        final UpdateException exception = assertThrows(
+                UpdateException.class,
+                () -> {
+                    final Film updateFilm = filmController.updateFilm(newFilm);
                 });
         assertEquals("Не верный id фильма.", exception.getMessage());
     }
