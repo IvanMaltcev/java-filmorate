@@ -1,10 +1,12 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.DataBinder;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.services.Validation;
+import ru.yandex.practicum.filmorate.services.ValidationData;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
@@ -31,8 +33,13 @@ public class UserController {
     }
 
     @PostMapping
-    public User createUser(@Valid @RequestBody User user) throws ValidationException {
-        Validation.validationNewUser(user);
+    public User createUser(@Valid @RequestBody User user, BindingResult error) throws ValidationException {
+        if (error.hasFieldErrors()) {
+            throw new ValidationException(error.getFieldErrors().get(0).getDefaultMessage());
+        }
+        if (user.getName() == null || user.getName().isBlank()) {
+            user.setName(user.getLogin());
+        }
         user.setId(incrementAndGetId());
         users.put(user.getId(), user);
         log.info("Пользователь {} добавлен", user.getName());
@@ -41,7 +48,7 @@ public class UserController {
 
     @PutMapping
     public User updateUser(@RequestBody User user) {
-        Validation.UpdateValidationUser(users, user);
+        ValidationData.UpdateValidationUser(users, user);
         users.put(user.getId(), user);
         log.info("Информация о пользователе с id {} обновлена", user.getId());
         return user;
