@@ -6,7 +6,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.DataBinder;
 import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.exception.UpdateException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import javax.validation.ConstraintViolation;
@@ -32,7 +31,7 @@ class FilmControllerTest {
 
         filmController = new FilmController();
         ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
-        validator = validatorFactory.usingContext().getValidator();
+        validator = validatorFactory.getValidator();
 
         film = new Film (
                 0,
@@ -106,12 +105,12 @@ class FilmControllerTest {
     public void shouldReturnExceptionWhenIncorrectReleaseDate() {
         final Film newFilm = filmController.addFilm(film, error);
         newFilm.setReleaseDate(LocalDate.of(1895,12,25));
-        final ValidationException exception = assertThrows(
-                ValidationException.class,
-                () -> {
-                    final Film errorFilm = filmController.addFilm(newFilm, error);
-                });
-        assertEquals("Дата релиза должна быть не раньше 28 декабря 1895 года.", exception.getMessage());
+        Set<ConstraintViolation<Film>> validates = validator.validate(newFilm);
+        assertTrue(validates.size() > 0);
+        String message = validates.stream()
+                .map(ConstraintViolation::getMessage)
+                .collect(Collectors.toList()).get(0);
+        assertEquals("Дата релиза должна быть не раньше 28 декабря 1895 года.", message);
     }
 
     @Test

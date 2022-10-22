@@ -35,10 +35,6 @@ public class FilmController {
         if (error.hasFieldErrors()) {
             throw new ValidationException(error.getFieldErrors().get(0).getDefaultMessage());
         }
-        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-            log.info("Некорректная дата релиза - {}.", film.getReleaseDate());
-            throw new ValidationException("Дата релиза должна быть не раньше 28 декабря 1895 года.");
-        }
         film.setId(incrementAndGetId());
         films.put(film.getId(), film);
         log.info("Фильм {} добавлен", film.getName());
