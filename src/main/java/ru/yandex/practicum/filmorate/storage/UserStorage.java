@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.storage;
 
-import org.springframework.validation.BindingResult;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.List;
@@ -10,9 +9,11 @@ public interface UserStorage {
 
     List<User> findAllUsers();
 
-    User createUser(User user, BindingResult error);
+    User createUser(User user);
 
     User updateUser(User user);
 
     Map<Integer, User> getUsers();
+
+    void verificationUserId(int userId);
 }
