@@ -1,8 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.stereotype.Service;
-import org.springframework.validation.BindingResult;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
@@ -22,8 +20,8 @@ public class UserService {
         return userStorage.findAllUsers();
     }
 
-    public User createUser(User user, BindingResult error) {
-        return userStorage.createUser(user, error);
+    public User createUser(User user) {
+        return userStorage.createUser(user);
     }
 
     public User updateUser(User user) {
@@ -31,16 +29,12 @@ public class UserService {
     }
 
     public User getUser(int userId) {
-        if (!userStorage.getUsers().containsKey(userId)) {
-            throw new NotFoundException("Не верный id пользователя.");
-        }
+        userStorage.verificationUserId(userId);
         return userStorage.getUsers().get(userId);
     }
 
     public List<User> showFriends(int userId) {
-        if (!userStorage.getUsers().containsKey(userId)) {
-            throw new NotFoundException("Не верный id пользователя.");
-        }
+        userStorage.verificationUserId(userId);
         List<User> friends = new ArrayList<>();
         User user = userStorage.getUsers().get(userId);
         for (User friend : userStorage.getUsers().values()) {
@@ -52,9 +46,8 @@ public class UserService {
     }
 
     public List<User> showCommonFriends(int userId, int otherUserId) {
-        if (!userStorage.getUsers().containsKey(userId) && !userStorage.getUsers().containsKey(otherUserId)) {
-            throw new NotFoundException("Не верный id пользователя.");
-        }
+        userStorage.verificationUserId(userId);
+        userStorage.verificationUserId(otherUserId);
         List<User> commonFriends = new ArrayList<>();
         User user = userStorage.getUsers().get(userId);
         User otherUser = userStorage.getUsers().get(otherUserId);
@@ -67,9 +60,8 @@ public class UserService {
     }
 
     public void addNewFriend(int userId, int friendId) {
-        if (!userStorage.getUsers().containsKey(userId) || !userStorage.getUsers().containsKey(friendId)) {
-            throw new NotFoundException("Не верный id пользователя.");
-        }
+        userStorage.verificationUserId(userId);
+        userStorage.verificationUserId(friendId);
         User user = userStorage.getUsers().get(userId);
         User friend = userStorage.getUsers().get(friendId);
         user.getFriends().add(friendId);
@@ -77,13 +69,11 @@ public class UserService {
     }
 
     public void deleteFriend(int userId, int friendId) {
-        if (!userStorage.getUsers().containsKey(userId) && !userStorage.getUsers().containsKey(friendId)) {
-            throw new NotFoundException("Не верный id пользователя.");
-        }
+        userStorage.verificationUserId(userId);
+        userStorage.verificationUserId(friendId);
         User user = userStorage.getUsers().get(userId);
         User friend = userStorage.getUsers().get(friendId);
         user.getFriends().remove(friendId);
         friend.getFriends().remove(userId);
     }
-
 }

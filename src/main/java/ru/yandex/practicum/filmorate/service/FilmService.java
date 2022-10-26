@@ -1,8 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.stereotype.Service;
-import org.springframework.validation.BindingResult;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
@@ -25,8 +23,8 @@ public class FilmService {
         return filmStorage.getAllFilms();
     }
 
-    public Film addFilm(Film film, BindingResult error) {
-        return filmStorage.addFilm(film, error);
+    public Film addFilm(Film film) {
+        return filmStorage.addFilm(film);
     }
 
     public Film updateFilm(Film film) {
@@ -34,9 +32,7 @@ public class FilmService {
     }
 
     public Film getFilm(int filmId) {
-        if (!filmStorage.getFilms().containsKey(filmId)) {
-            throw new NotFoundException("Не верный id фильма.");
-        }
+        filmStorage.verificationFilmId(filmId);
         return filmStorage.getFilms().get(filmId);
     }
 
@@ -48,23 +44,15 @@ public class FilmService {
     }
 
     public void addLike(int filmId, int userId) {
-        if (!filmStorage.getFilms().containsKey(filmId)) {
-            throw new NotFoundException("Не верный id фильма.");
-        }
-        if (!userStorage.getUsers().containsKey(userId)) {
-            throw new NotFoundException("Не верный id пользователя.");
-        }
+        filmStorage.verificationFilmId(filmId);
+        userStorage.verificationUserId(userId);
         Film film = filmStorage.getFilms().get(filmId);
         film.getLikes().add(userId);
     }
 
     public void deleteLike(int filmId, int userId) {
-        if (!filmStorage.getFilms().containsKey(filmId)) {
-            throw new NotFoundException("Не верный id фильма.");
-        }
-        if (!userStorage.getUsers().containsKey(userId)) {
-            throw new NotFoundException("Не верный id пользователя.");
-        }
+        filmStorage.verificationFilmId(filmId);
+        userStorage.verificationUserId(userId);
         Film film = filmStorage.getFilms().get(filmId);
         film.getLikes().remove(userId);
     }
