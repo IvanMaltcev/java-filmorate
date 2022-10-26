@@ -2,8 +2,6 @@ package ru.yandex.practicum.filmorate;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.DataBinder;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
@@ -24,7 +22,6 @@ class FilmControllerTest {
 
     private FilmStorage filmStorage;
     private Film film;
-    private BindingResult error;
     private Validator validator;
 
     @BeforeEach
@@ -41,14 +38,12 @@ class FilmControllerTest {
                 LocalDate.of(2012,2,12),
                 220
         );
-
-        error = new DataBinder(film).getBindingResult();
     }
 
     @Test
     void addNewFilm() {
 
-        final Film newFilm = filmStorage.addFilm(film, error);
+        final Film newFilm = filmStorage.addFilm(film);
 
         assertNotNull(newFilm, "Фильм не найден.");
         assertEquals(film, newFilm, "Фильмы не совпадают.");
@@ -63,7 +58,7 @@ class FilmControllerTest {
     @Test
     void updateNewFilm() {
 
-        final Film newFilm = filmStorage.addFilm(film, error);
+        final Film newFilm = filmStorage.addFilm(film);
         newFilm.setDescription("New description of test film");
         final Film updateFilm = filmStorage.updateFilm(newFilm);
 
@@ -76,7 +71,7 @@ class FilmControllerTest {
 
     @Test
     public void shouldReturnExceptionWhenNameIsBlank() {
-        final Film newFilm = filmStorage.addFilm(film, error);
+        final Film newFilm = filmStorage.addFilm(film);
         newFilm.setName("");
         Set<ConstraintViolation<Film>> validates = validator.validate(newFilm);
         assertTrue(validates.size() > 0);
@@ -89,7 +84,7 @@ class FilmControllerTest {
 
     @Test
     public void shouldReturnExceptionWhenDescriptionLengthIsExceeded() {
-        final Film newFilm = filmStorage.addFilm(film, error);
+        final Film newFilm = filmStorage.addFilm(film);
         newFilm.setDescription("Описание фильма превышает максимальную заданную длину, что приводит к ошибке." +
                 "Чтобы избежать этого необходимо уменьшить количество символов в описании, " +
                 "сделать описание более сжатым, но при этом не потерять суть.");
@@ -104,7 +99,7 @@ class FilmControllerTest {
 
     @Test
     public void shouldReturnExceptionWhenIncorrectReleaseDate() {
-        final Film newFilm = filmStorage.addFilm(film, error);
+        final Film newFilm = filmStorage.addFilm(film);
         newFilm.setReleaseDate(LocalDate.of(1895,12,25));
         Set<ConstraintViolation<Film>> validates = validator.validate(newFilm);
         assertTrue(validates.size() > 0);
@@ -116,7 +111,7 @@ class FilmControllerTest {
 
     @Test
     public void shouldReturnExceptionWhenDurationIsNegative() {
-        final Film newFilm = filmStorage.addFilm(film, error);
+        final Film newFilm = filmStorage.addFilm(film);
         newFilm.setDuration(-100);
         Set<ConstraintViolation<Film>> validates = validator.validate(newFilm);
         assertTrue(validates.size() > 0);
@@ -129,7 +124,7 @@ class FilmControllerTest {
 
     @Test
     public void shouldReturnExceptionWhenIdNotFound() {
-        final Film newFilm = filmStorage.addFilm(film, error);
+        final Film newFilm = filmStorage.addFilm(film);
         newFilm.setId(2);
         final NotFoundException exception = assertThrows(
                 NotFoundException.class,

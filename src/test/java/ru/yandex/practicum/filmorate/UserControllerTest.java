@@ -4,8 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.DataBinder;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
@@ -26,7 +24,6 @@ class UserControllerTest {
 
     private UserStorage userStorage;
     private User user;
-    private BindingResult error;
     private Validator validator;
 
     @BeforeEach
@@ -43,14 +40,12 @@ class UserControllerTest {
                 "Name",
                 LocalDate.of(1999,5,23)
         );
-
-        error = new DataBinder(user).getBindingResult();
     }
 
     @Test
     void addNewUser() {
 
-        final User newUser = userStorage.createUser(user, error);
+        final User newUser = userStorage.createUser(user);
 
         assertNotNull(newUser, "Пользователь не найден.");
         assertEquals(user, newUser, "Пользователи не совпадают.");
@@ -65,10 +60,10 @@ class UserControllerTest {
     @Test
     void updateNewUser() {
 
-        final User user1 = userStorage.createUser(user, error);
+        final User user1 = userStorage.createUser(user);
         user1.setName("");
         final User updateUser = userStorage.updateUser(user1);
-        final User newUser = userStorage.createUser(updateUser, error);
+        final User newUser = userStorage.createUser(updateUser);
 
         assertEquals(user.getLogin(), newUser.getName(), "Логины пользователей не совпадают.");
 
@@ -82,7 +77,7 @@ class UserControllerTest {
     @ParameterizedTest
     @ValueSource(strings = {"", "Test.test.ru"})
     public void shouldReturnExceptionWhenIncorrectEmail(String email) {
-        final User newUser = userStorage.createUser(user, error);
+        final User newUser = userStorage.createUser(user);
         newUser.setEmail(email);
         Set<ConstraintViolation<User>> validates = validator.validate(newUser);
         assertTrue(validates.size() > 0);
@@ -97,7 +92,7 @@ class UserControllerTest {
     @ParameterizedTest
     @ValueSource(strings = {"", " "})
     public void shouldReturnExceptionWhenIncorrectLogin(String login) {
-        final User newUser = userStorage.createUser(user, error);
+        final User newUser = userStorage.createUser(user);
         newUser.setLogin(login);
         Set<ConstraintViolation<User>> validates = validator.validate(newUser);
         assertTrue(validates.size() > 0);
@@ -110,7 +105,7 @@ class UserControllerTest {
 
     @Test
     public void shouldReturnExceptionWhenIncorrectBirthDate() {
-        final User newUser = userStorage.createUser(user, error);
+        final User newUser = userStorage.createUser(user);
         newUser.setBirthday(LocalDate.of(2022,11,25));
         Set<ConstraintViolation<User>> validates = validator.validate(newUser);
         assertTrue(validates.size() > 0);
@@ -123,7 +118,7 @@ class UserControllerTest {
 
     @Test
     public void shouldReturnExceptionWhenIdNotFound() {
-        final User newUser = userStorage.createUser(user, error);
+        final User newUser = userStorage.createUser(user);
         newUser.setId(2);
         final NotFoundException exception = assertThrows(
                 NotFoundException.class,
